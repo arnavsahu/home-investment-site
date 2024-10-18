@@ -7,16 +7,14 @@ import Model from './Pages/Model';  // Import the Model component
 function App() {
   return (
     <Router>
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/model" element={<Model />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/model" element={<Model />} />
+      </Routes>
     </Router>
   );
 }
 
-// Create a simple Home component to show on the default route
 function Home() {
   return (
     <div>

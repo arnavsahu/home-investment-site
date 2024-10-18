@@ -2,40 +2,47 @@
 
 import React, { useState } from 'react';
 import Filters from '../Components/Filters';
-import FuturePredictions from '../Components/FuturePredictions';
-import Results from '../Components/Results';
+//import FuturePredictions from '../Components/FuturePredictions';
+//import Results from '../Components/Results';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function Model() {
-  const [filters, setFilters] = useState({});
+const Model = () => {
+  const [homes, setHomes] = useState([]);
 
-  // Define a function that handles form submissions from Filters
-  const handleFiltersSubmit = (formValues) => {
-    setFilters(formValues);
-    console.log('Filters applied:', formValues);
-    // You can add any logic to use these filters, such as making an API call
+  const fetchFilteredHomes = async (filters) => {
+    const queryString = Object.keys(filters)
+      .map(key => `${key}=${encodeURIComponent(filters[key])}`)
+      .join('&');
+
+    const response = await fetch(`/homes?${queryString}`);
+    const data = await response.json();
+    setHomes(data);  // Update the state with the filtered homes
   };
 
   return (
-    <div className="container-fluid p-3">
-      <div className="row">
-        {/* Left column (Filters and Future Predictions) */}
-        <div className="col-md-6">
-          <div className="mb-3">
-            <Filters onSubmit={handleFiltersSubmit} /> {/* Pass the handler function */}
-          </div>
-          <div>
-            <FuturePredictions />
-          </div>
-        </div>
-
-        {/* Right column (Results) */}
-        <div className="col-md-6">
-          <Results filters={filters} /> {/* Optionally, pass the filters to other components */}
-        </div>
+    <div>
+      <h1>Filtered Homes</h1>
+      <Filters onFilterSubmit={fetchFilteredHomes} />
+      
+      {/* Display the filtered homes */}
+      <div>
+        {homes.length > 0 ? (
+          homes.map(home => (
+            <div key={home.id}>
+              <h2>{home.address}</h2>
+              <p>City: {home.city}</p>
+              <p>State: {home.state}</p>
+              <p>House Value: ${home.house_value}</p>
+              <p>Bedrooms: {home.bedrooms}</p>
+              <p>Bathrooms: {home.bathrooms}</p>
+            </div>
+          ))
+        ) : (
+          <p>No homes found.</p>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default Model;
