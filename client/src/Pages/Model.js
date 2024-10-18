@@ -5,25 +5,25 @@ import Filters from '../Components/Filters';
 //import FuturePredictions from '../Components/FuturePredictions';
 //import Results from '../Components/Results';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios'; // Import axios
 
 const Model = () => {
   const [homes, setHomes] = useState([]);
 
   const fetchFilteredHomes = async (filters) => {
-    const queryString = Object.keys(filters)
-      .map(key => `${key}=${encodeURIComponent(filters[key])}`)
-      .join('&');
-
-    const response = await fetch(`/homes?${queryString}`);
-    const data = await response.json();
-    setHomes(data);  // Update the state with the filtered homes
+    try {
+      const response = await axios.get('/homes', { params: filters }); // Use axios with query parameters
+      setHomes(response.data);  // Update the state with the filtered homes
+    } catch (error) {
+      console.error('Error fetching homes:', error);
+    }
   };
 
   return (
     <div>
       <h1>Filtered Homes</h1>
       <Filters onFilterSubmit={fetchFilteredHomes} />
-      
+
       {/* Display the filtered homes */}
       <div>
         {homes.length > 0 ? (
