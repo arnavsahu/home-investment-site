@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 
+const filterConfig = [
+  { name: 'id', label: 'ID', type: 'text' },
+  { name: 'address', label: 'Address', type: 'text' },
+  { name: 'city', label: 'City', type: 'text' },
+  { name: 'state', label: 'State', type: 'text' },
+  { name: 'zip_code', label: 'Zip Code', type: 'text' },
+  { name: 'min_house_value', label: 'Min House Value', type: 'number' },
+  { name: 'max_house_value', label: 'Max House Value', type: 'number' },
+  { name: 'min_estimated_rent', label: 'Min Estimated Rent', type: 'number' },
+  { name: 'max_estimated_rent', label: 'Max Estimated Rent', type: 'number' },
+  { name: 'bedrooms', label: 'Bedrooms', type: 'number' },
+  { name: 'bathrooms', label: 'Bathrooms', type: 'number' },
+  { name: 'min_square_feet', label: 'Min Square Feet', type: 'number' },
+  { name: 'max_square_feet', label: 'Max Square Feet', type: 'number' },
+];
+
 const Filters = ({ onFilterSubmit }) => {
-  const [filters, setFilters] = useState({
-    id: '',
-    address: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    min_house_value: '',
-    max_house_value: '',
-    min_estimated_rent: '',
-    max_estimated_rent: '',
-    bedrooms: '',
-    bathrooms: '',
-    min_square_feet: '',
-    max_square_feet: ''
-  });
+  const [filters, setFilters] = useState(
+    filterConfig.reduce((acc, filter) => ({ ...acc, [filter.name]: '' }), {})
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,133 +28,32 @@ const Filters = ({ onFilterSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onFilterSubmit(filters); // Pass the filters to the parent component
+    onFilterSubmit(filters);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {/* String filters */}
-      <div>
-        <label>ID:</label>
-        <input
-          type="text"
-          name="id"
-          value={filters.id}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Address:</label>
-        <input
-          type="text"
-          name="address"
-          value={filters.address}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>City:</label>
-        <input
-          type="text"
-          name="city"
-          value={filters.city}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>State:</label>
-        <input
-          type="text"
-          name="state"
-          value={filters.state}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Zip Code:</label>
-        <input
-          type="text"
-          name="zip_code"
-          value={filters.zip_code}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      {/* Numerical filters */}
-      <div>
-        <label>Min House Value:</label>
-        <input
-          type="number"
-          name="min_house_value"
-          value={filters.min_house_value}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Max House Value:</label>
-        <input
-          type="number"
-          name="max_house_value"
-          value={filters.max_house_value}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Min Estimated Rent:</label>
-        <input
-          type="number"
-          name="min_estimated_rent"
-          value={filters.min_estimated_rent}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Max Estimated Rent:</label>
-        <input
-          type="number"
-          name="max_estimated_rent"
-          value={filters.max_estimated_rent}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Bedrooms:</label>
-        <input
-          type="number"
-          name="bedrooms"
-          value={filters.bedrooms}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Bathrooms:</label>
-        <input
-          type="number"
-          name="bathrooms"
-          value={filters.bathrooms}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Min Square Feet:</label>
-        <input
-          type="number"
-          name="min_square_feet"
-          value={filters.min_square_feet}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Max Square Feet:</label>
-        <input
-          type="number"
-          name="max_square_feet"
-          value={filters.max_square_feet}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <button type="submit">Filter Homes</button>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {filterConfig.map((filter) => (
+        <div key={filter.name} className="px-1">
+          <label htmlFor={filter.name} className="font-medium px-1">
+            {filter.label}:
+          </label>
+          <input
+            type={filter.type}
+            id={filter.name}
+            name={filter.name}
+            value={filters[filter.name]}
+            onChange={handleInputChange}
+            className="border border-gray-300 rounded-md px-3 py-1"
+          />
+        </div>
+      ))}
+      <button
+        type="submit"
+        className="px-4 py-2 rounded-md bg-blue-900 hover:bg-blue-500 text-white"
+        >
+        Filter Homes
+      </button>
     </form>
   );
 };

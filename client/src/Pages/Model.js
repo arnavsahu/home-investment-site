@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import Filters from '../Components/Filters';
-//import FuturePredictions from '../Components/FuturePredictions';
-//import Results from '../Components/Results';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import FuturePredictions from '../Components/FuturePredictions';
+import Results from '../Components/Results';
 import axios from 'axios'; // Import axios
 
 const Model = () => {
@@ -20,26 +19,17 @@ const Model = () => {
   };
 
   return (
-    <div>
-      <h1>Filtered Homes</h1>
-      <Filters onFilterSubmit={fetchFilteredHomes} />
+    <div className='flex flex-row'>
+      <div className='flex flex-col w-1/2'>
+        <h2>Filtered Homes</h2>
+        <Filters onFilterSubmit={fetchFilteredHomes} />
 
-      {/* Display the filtered homes */}
-      <div>
-        {homes.length > 0 ? (
-          homes.map(home => (
-            <div key={home.id}>
-              <h2>{home.address}</h2>
-              <p>City: {home.city}</p>
-              <p>State: {home.state}</p>
-              <p>House Value: ${home.house_value}</p>
-              <p>Bedrooms: {home.bedrooms}</p>
-              <p>Bathrooms: {home.bathrooms}</p>
-            </div>
-          ))
-        ) : (
-          <p>No homes found.</p>
-        )}
+        <h2>Future Predictions</h2>
+        <FuturePredictions onFilterSubmit={fetchFilteredHomes} />
+      </div>
+      <div className='flex flex-col w-1/2'>
+        <h2>Filtered Homes</h2>
+        <Results onFilterSubmit={fetchFilteredHomes} />
       </div>
     </div>
   );
