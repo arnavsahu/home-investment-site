@@ -1,17 +1,14 @@
-// src/pages/Model.js
-
 import React, { useState } from 'react';
 import Filters from '../Components/Filters';
-import FuturePredictions from '../Components/FuturePredictions';
 import Results from '../Components/Results';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 const Model = () => {
   const [homes, setHomes] = useState([]);
 
   const fetchFilteredHomes = async (filters) => {
     try {
-      const response = await axios.get('/homes', { params: filters }); // Use axios with query parameters
+      const response = await axios.get('/homes', { params: filters });
       setHomes(response.data);  // Update the state with the filtered homes
     } catch (error) {
       console.error('Error fetching homes:', error);
@@ -19,17 +16,18 @@ const Model = () => {
   };
 
   return (
-    <div className='flex flex-row'>
-      <div className='flex flex-col w-1/2'>
-        <h2>Filtered Homes</h2>
+    <div className="flex flex-row h-screen space-x-4">
+      {/* Filter Section - 30% width */}
+      <div className="flex flex-col w-1/3 bg-white p-4 rounded-md shadow-sm">
         <Filters onFilterSubmit={fetchFilteredHomes} />
-
-        <h2>Future Predictions</h2>
-        <FuturePredictions onFilterSubmit={fetchFilteredHomes} />
       </div>
-      <div className='flex flex-col w-1/2'>
-        <h2>Filtered Homes</h2>
-        <Results onFilterSubmit={fetchFilteredHomes} />
+
+      {/* Results Section - 70% width with scrollable box */}
+      <div className="flex flex-col w-2/3 bg-gray-100 p-4 rounded-md shadow-sm">
+        {/* Scrollable results container that takes up the full height of the page */}
+        <div className="flex-grow overflow-y-auto border border-gray-300 rounded-md p-4">
+          <Results homes={homes} /> {/* Pass homes to Results */}
+        </div>
       </div>
     </div>
   );
