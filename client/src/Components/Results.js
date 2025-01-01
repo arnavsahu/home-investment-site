@@ -15,6 +15,7 @@ const Results = ({ homes }) => {
                 <p><strong>Bedrooms:</strong> {home.bedrooms}</p>
                 <p><strong>Bathrooms:</strong> {home.bathrooms}</p>
                 <p><strong>Square Feet:</strong> {home.square_feet}</p>
+                <p><strong>ROI</strong> {home.square_feet}</p>
               </div>
             </div>
           ))}
