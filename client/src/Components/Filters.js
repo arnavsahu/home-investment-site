@@ -13,11 +13,11 @@ const filterConfig = [
   { name: 'square_feet', label: 'Square Feet', type: 'range', min: 0, max: 10000 },
   { name: 'bedrooms', label: 'Bedrooms', type: 'number' },
   { name: 'bathrooms', label: 'Bathrooms', type: 'number' },
-  { name: 'Down Payment', label: 'Down Payment', type: 'number' },
-  { name: 'Interest Rate', label: 'Interest Rate', type: 'number' },
-  { name: 'Loan Term Years', label: 'Loan Term Years', type: 'number' },
-  { name: 'Analysis Year', label: 'Analysis Year', type: 'number' },
-  { name: 'Apprentice Rate', label: 'Apprentice Rate', type: 'number' },
+  { name: 'down_payment', label: 'Down Payment', type: 'number' },
+  { name: 'interest_rate', label: 'Interest Rate', type: 'number' },
+  { name: 'loan_term_years', label: 'Loan Term Years', type: 'number' },
+  { name: 'analysis_year', label: 'Analysis Year', type: 'number' },
+  { name: 'apprentice_rate', label: 'Apprentice Rate', type: 'number' }
 ];
 
 const Filters = ({ onFilterSubmit }) => {
