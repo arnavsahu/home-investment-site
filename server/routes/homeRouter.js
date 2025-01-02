@@ -13,8 +13,8 @@ router.get('/homes', async (req, res) => {
 
     const updatedHomes = homes.map(home => ({
         home_details: extractHomeDetails(home),
-        calculation_metrics: metrics || getPresentMetrics(req, roiCalculationMetrics),
-        results: metrics ? addEstimatedMetrics(home, metrics) : createEmptyResults()
+        calculation_metrics: metrics,
+        results: addEstimatedMetrics(home, metrics)
     }));
 
     console.log(updatedHomes);
@@ -23,28 +23,27 @@ router.get('/homes', async (req, res) => {
 
 function validateROIMetrics(req, metricsList) {
     const metrics = {};
-    let hasAllMetrics = true;
 
     metricsList.forEach((metric) => {
         if (req.query[metric] !== undefined) {
             metrics[metric] = parseFloat(req.query[metric]);
         } else {
-            hasAllMetrics = false;
+            metrics[metric] = null;
         }
-    });
-
-    return hasAllMetrics ? metrics : null;
-}
-
-function getPresentMetrics(req, metricsList) {
-    const metrics = {};
-
-    metricsList.forEach((metric) => {
-        metrics[metric] = req.query[metric] !== undefined ? parseFloat(req.query[metric]) : null;
     });
 
     return metrics;
 }
+
+// function getPresentMetrics(req, metricsList) {
+//     const metrics = {};
+
+//     metricsList.forEach((metric) => {
+//         metrics[metric] = req.query[metric] !== undefined ? parseFloat(req.query[metric]) : null;
+//     });
+
+//     return metrics;
+// }
 
 function filterHomes(req, stringColumns, numericalColumns) {
     const conditions = [];
@@ -82,25 +81,83 @@ function executeQuery(query, queryParams) {
     });
 }
 
+
+const calculationConfig = {
+    estimated_mortgage: ({ home, metrics }) => {
+        const { down_payment, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+
+        return principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    },
+
+    estimated_rent_income: ({ home, metrics }) => {
+        const { analysis_year, down_payment, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined ||
+            analysis_year == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+        const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+        return (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * n);
+    },
+
+    estimated_appreciation: ({ home, metrics }) => {
+        const { apprentice_rate, analysis_year } = metrics;
+        if (apprentice_rate == undefined ||
+            analysis_year == undefined) return null;
+
+        return (
+            home.house_value * Math.pow(1 + apprentice_rate * 0.01, analysis_year)
+        );
+    },
+
+    estimated_roi: ({ home, metrics }) => {
+        const { down_payment, apprentice_rate, analysis_year, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined ||
+            down_payment == undefined ||
+            apprentice_rate == undefined ||
+            analysis_year == undefined
+        ) {
+            return null;
+        }
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+        const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const estimatedRentIncome = (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * n);
+        const estimatedAppreciation = home.house_value * Math.pow(1 + apprentice_rate * 0.01, analysis_year);
+
+        return ((estimatedAppreciation - down_payment + estimatedRentIncome) / down_payment) * 100;
+    },
+};
+
+
+
 function addEstimatedMetrics(home, metrics) {
-    const {
-        down_payment,
-        interest_rate,
-        loan_term_years,
-        analysis_year,
-        apprentice_rate
-    } = metrics;
+    const finalResults = {};
+    for (const [key, formulaFn] of Object.entries(calculationConfig)) {
+        finalResults[key] = formulaFn({ home, metrics });
+    }
 
-    const principleLoanAmount = home.house_value - down_payment;
-    const r = (interest_rate * 0.01) / 12;
-    const n = loan_term_years * 12;
-
-    const estimatedMortgage = principleLoanAmount * ((r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
-    const estimatedRentIncome = (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * n);
-    const estimatedAppreciation = home.house_value * Math.pow(1 + (apprentice_rate*0.01), analysis_year);
-    const estimatedROI = ((estimatedAppreciation - down_payment + estimatedRentIncome) / down_payment) * 100;
-
-    return { estimated_mortgage: estimatedMortgage, estimated_rent_income: estimatedRentIncome, estimated_appreciation: estimatedAppreciation, estimated_roi: estimatedROI };
+    return finalResults;
 }
 
 function extractHomeDetails(home) {
