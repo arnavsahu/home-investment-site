@@ -8,11 +8,7 @@ const Results = ({ homes }) => {
   // Configuration for sorting
   const sortConfig = [
     { sort_display_name: 'House Value', field: 'house_value', source: 'home_details' },
-    { sort_display_name: 'Estimated Rent', field: 'estimated_rent', source: 'home_details' },
-    { sort_display_name: 'Principle Loan Amount', field: 'principle_loan_amount', source: 'results' },
-    { sort_display_name: 'Estimated Mortgage', field: 'estimated_mortgage', source: 'results' },
     { sort_display_name: 'Estimated Rent Income', field: 'estimated_rent_income', source: 'results' },
-    { sort_display_name: 'Estimated Appreciation', field: 'estimated_appreciation', source: 'results' },
     { sort_display_name: 'Estimated ROI', field: 'estimated_roi', source: 'results' },
   ];
 
