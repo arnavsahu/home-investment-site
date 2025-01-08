@@ -11,7 +11,7 @@ const HomeCard = ({ homes }) => (
           {data.map(({ label, value, isDollar, isPercent }) => (
             <p key={label}>
               <strong>{label}:</strong>{" "}
-              {value !== undefined
+              {value != undefined
                 ? `${isDollar ? formatCurrency(value) : formatNumber(value)}${isPercent ? '%' : ''}`
                 : 'N/A'}
             </p>
@@ -34,6 +34,8 @@ const HomeCard = ({ homes }) => (
           <div className="text-lg font-semibold">
             {`${home_details.address || ''}, ${home_details.city || ''}, ${home_details.state || ''} ${home_details.zip_code || ''}`}
           </div>
+
+
           {renderDetails('Home Details', [
             { label: 'House Value', value: home_details.house_value, isDollar: true },
             { label: 'Estimated Rent', value: home_details.estimated_rent, isDollar: true },
@@ -52,6 +54,9 @@ const HomeCard = ({ homes }) => (
             { label: 'Principle Loan Amount', value: results.principle_loan_amount, isDollar: true },
             { label: 'Estimated Mortgage', value: results.estimated_mortgage, isDollar: true },
             { label: 'Estimated Rent Income', value: results.estimated_rent_income, isDollar: true },
+            { label: 'Mortgage Period Losses', value: results.mortgage_period_losses, isDollar: true },
+            { label: 'Mortgage Left', value: results.estimated_mortgage_left, isDollar: true },
+            { label: 'Total Investment', value: results.total_investment, isDollar: true },
             { label: 'Estimated Appreciation', value: results.estimated_appreciation, isDollar: true },
             { label: 'Estimated ROI', value: results.estimated_roi, isPercent: true },
           ])}

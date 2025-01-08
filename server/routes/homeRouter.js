@@ -35,15 +35,6 @@ function validateROIMetrics(req, metricsList) {
     return metrics;
 }
 
-// function getPresentMetrics(req, metricsList) {
-//     const metrics = {};
-
-//     metricsList.forEach((metric) => {
-//         metrics[metric] = req.query[metric] !== undefined ? parseFloat(req.query[metric]) : null;
-//     });
-
-//     return metrics;
-// }
 
 function filterHomes(req, stringColumns, numericalColumns) {
     const conditions = [];
@@ -83,6 +74,18 @@ function executeQuery(query, queryParams) {
 
 
 const calculationConfig = {
+    principle_loan_amount: ({ home, metrics }) => {
+        const { down_payment } = metrics;
+        if (
+            down_payment == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+   
+        return principalLoanAmount;
+    },
+
+
     estimated_mortgage: ({ home, metrics }) => {
         const { down_payment, interest_rate, loan_term_years } = metrics;
         if (
@@ -111,8 +114,69 @@ const calculationConfig = {
         const r = (interest_rate * 0.01) / 12;
         const n = loan_term_years * 12;
         const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const mortgageYears = loan_term_years > analysis_year ? analysis_year : loan_term_years;
 
-        return (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * n);
+        return (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * (mortgageYears *12));
+    },
+
+    estimated_mortgage_left: ({ home, metrics }) => {
+        const { analysis_year, down_payment, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined ||
+            analysis_year == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+        const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const mortgageYears = loan_term_years > analysis_year ? analysis_year : loan_term_years;
+        const mortgageLeft =  (loan_term_years - mortgageYears) *12* estimatedMortgage;
+
+        return mortgageLeft;
+    },
+
+    mortgage_period_losses: ({ home, metrics }) => {
+        const { analysis_year, down_payment, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined ||
+            analysis_year == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+        const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const mortgageYears = loan_term_years > analysis_year ? analysis_year : loan_term_years;
+        const mortgagePeriod =  (home.estimated_rent * (mortgageYears * 12)) - (estimatedMortgage * (mortgageYears *12));
+        const mortgagePeriodLosses =  mortgagePeriod>0? 0 : mortgagePeriod;
+
+        return mortgagePeriodLosses;
+    },
+
+    total_investment: ({ home, metrics }) => {
+        const { analysis_year, down_payment, interest_rate, loan_term_years } = metrics;
+        if (
+            down_payment == undefined ||
+            interest_rate == undefined ||
+            loan_term_years == undefined ||
+            analysis_year == undefined
+        ) return null;
+
+        const principalLoanAmount = home.house_value - down_payment;
+        const r = (interest_rate * 0.01) / 12;
+        const n = loan_term_years * 12;
+        const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const mortgageYears = loan_term_years > analysis_year ? analysis_year : loan_term_years;
+        const mortgagePeriod =  (home.estimated_rent * (mortgageYears * 12)) - (estimatedMortgage * (mortgageYears *12));
+        const mortgagePeriodLosses =  mortgagePeriod>0? 0 : mortgagePeriod;
+        const totalInvestment =  down_payment + (-mortgagePeriodLosses);
+
+        return totalInvestment;
     },
 
     estimated_appreciation: ({ home, metrics }) => {
@@ -143,9 +207,18 @@ const calculationConfig = {
         const n = loan_term_years * 12;
         const estimatedMortgage = principalLoanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
         const estimatedRentIncome = (home.estimated_rent * (analysis_year * 12)) - (estimatedMortgage * n);
+        
+        
+        
         const estimatedAppreciation = home.house_value * Math.pow(1 + apprentice_rate * 0.01, analysis_year);
+        
+        
+        const mortgageYears = loan_term_years > analysis_year ? analysis_year : loan_term_years;
+        const mortgagePeriod =  (home.estimated_rent * (mortgageYears * 12)) - (estimatedMortgage * (mortgageYears *12));
+        const mortgagePeriodLosses =  mortgagePeriod>0? 0 : mortgagePeriod;
+        const totalInvestment =  down_payment + (-mortgagePeriodLosses);
 
-        return ((estimatedAppreciation - down_payment + estimatedRentIncome) / down_payment) * 100;
+        return ((estimatedAppreciation - down_payment + estimatedRentIncome) / totalInvestment) * 100;
     },
 };
 
@@ -163,15 +236,6 @@ function addEstimatedMetrics(home, metrics) {
 function extractHomeDetails(home) {
     const { id, address, city, state, zip_code, house_value, estimated_rent, bedrooms, bathrooms, square_feet } = home;
     return { id, address, city, state, zip_code, house_value, estimated_rent, bedrooms, bathrooms, square_feet };
-}
-
-function createEmptyResults() {
-    return {
-        estimated_mortgage: null,
-        estimated_rent_income: null,
-        estimated_appreciation: null,
-        estimated_roi: null
-    };
 }
 
 module.exports = router;
