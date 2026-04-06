@@ -1,0 +1,3 @@
+scrape_redfin.py
+*.csv
+venv/

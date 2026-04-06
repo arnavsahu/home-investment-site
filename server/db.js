@@ -1,24 +1,18 @@
-// require('dotenv').config();
-// const Pool = require("pg").Pool;
+const { Pool } = require("pg");
 
-// const pool = new Pool({
-//     user: process.env.DB_USER,
-//     host: process.env.DB_HOST,
-//     database: process.env.DB_DATABASE,
-//     password: process.env.DB_PASSWORD,
-//     port: process.env.DB_PORT,
-// });
-
-// module.exports = pool; 
-
-const sqlite3 = require("sqlite3").verbose();
-
-const db = new sqlite3.Database('./real_estate_rentals.db', (err) => {
-    if (err) {
-        console.error('Error connecting to SQLite database:', err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-    }
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL?.includes("render.com")
+    ? { rejectUnauthorized: false }
+    : false,
 });
 
-module.exports = db;
+pool.on("connect", () => {
+  console.log("Connected to PostgreSQL database.");
+});
+
+pool.on("error", (err) => {
+  console.error("PostgreSQL pool error:", err.message);
+});
+
+module.exports = pool;
