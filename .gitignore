@@ -1,3 +1,6 @@
 node_modules/
 .env
 .README.mdvenv/
+venv/
+*.csv
+scrape_redfin.py
